@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FlowMind - AI Coding Workspace</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/theme/monokai.min.css">
+</head>
+<body>
+    <div class="workspace">
+        <header class="header">
+            <div class="current-file-box">
+                <i class="fas fa-file-code" id="currentFileIcon"></i>
+                <span id="currentPath">main.py</span>
+            </div>
+            
+            <div class="editor-controls">
+                <button id="saveFile" class="control-btn" title="Save">
+                    <i class="fas fa-save"></i>
+                </button>
+                <button id="formatCode" class="control-btn" title="Format">
+                    <i class="fas fa-magic"></i>
+                </button>
+                <button id="runCode" class="run-btn primary">
+                    <i class="fas fa-play"></i>
+                </button>
+                <button id="runInTab" class="run-btn secondary" title="Run in New Tab">
+                    <i class="fas fa-external-link-alt"></i>
+                </button>
+                <button id="stopCode" class="run-btn secondary" style="display: none;">
+                    <i class="fas fa-stop"></i>
+                </button>
+            </div>
+            
+            <div class="user-controls">
+                <button class="theme-toggle" id="themeToggle" title="Theme">
+                    <i class="fas fa-moon"></i>
+                </button>
+                <button id="newFile" class="control-btn" title="New">
+                    <i class="fas fa-plus"></i>
+                </button>
+            </div>
+        </header>
+
+        <div class="main-content">
+            <div class="activity-bar">
+                <div class="activity-item active" data-panel="files">
+                    <i class="fas fa-folder"></i>
+                </div>
+                <div class="activity-item" data-panel="terminal">
+                    <i class="fas fa-terminal"></i>
+                </div>
+                <div class="activity-item" data-panel="gemini">
+                    <i class="fas fa-robot"></i>
+                </div>
+            </div>
+
+            <aside class="sidebar">
+                <div class="panel files-panel active" id="filesPanel">
+                    <div class="panel-header">
+                        <h3>Explorer</h3>
+                        <div class="file-actions">
+                            <button id="newProject" class="action-btn" title="New Project">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                            <button id="loadProject" class="action-btn" title="Previous Projects">
+                                <i class="fas fa-folder-open"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="project-header" id="projectHeader" style="display: none;">
+                        <div class="project-name" id="currentProjectName">No Project</div>
+                        <div class="project-actions">
+                            <button id="newFolder" class="action-btn" title="New Folder">
+                                <i class="fas fa-folder-plus"></i>
+                            </button>
+                            <button id="newFileBtn" class="action-btn" title="New File">
+                                <i class="fas fa-file-medical"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div id="fileTree" class="file-tree">
+                        <div class="empty-state">No project selected</div>
+                    </div>
+                </div>
+                
+                <div class="panel terminal-panel" id="terminalPanel">
+                    <h3>Terminal</h3>
+                    <div class="terminal-content">
+                        <div class="terminal-line"><i class="fas fa-rocket"></i> Ready</div>
+                    </div>
+                </div>
+                
+                <div class="panel gemini-panel" id="geminiPanel">
+                    <div class="panel-header">
+                        <h3>
+                            <i class="fas fa-robot"></i>
+                        </h3>
+                        <div class="ai-actions">
+                            <button class="action-btn" id="refreshChat" title="Refresh">
+                                <i class="fas fa-sync-alt"></i>
+                            </button>
+                            <button class="action-btn" id="clearChat" title="Clear Chat">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                            <button class="action-btn" id="aiSettings" title="Settings">
+                                <i class="fas fa-cog"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="quick-actions">
+                        <button class="quick-btn" data-action="explain">
+                            <i class="fas fa-lightbulb"></i>
+                            <span>Explain Code</span>
+                        </button>
+                        <button class="quick-btn" data-action="optimize">
+                            <i class="fas fa-rocket"></i>
+                            <span>Optimize</span>
+                        </button>
+                        <button class="quick-btn" data-action="debug">
+                            <i class="fas fa-bug"></i>
+                            <span>Debug</span>
+                        </button>
+                        <button class="quick-btn" data-action="generate">
+                            <i class="fas fa-wand-magic-sparkles"></i>
+                            <span>Generate</span>
+                        </button>
+                    </div>
+                    
+                    <div class="ai-chat-container">
+                        <div class="loading-indicator" id="loadingIndicator" style="display: none;">
+                            <div class="spinner"></div>
+                            <span>Gemini is thinking...</span>
+                        </div>
+                        
+                        <div id="geminiChat" class="gemini-chat">
+                            <div class="chat-message ai-message">
+                                <div class="message-content">
+                                    <div class="message-text">👋 Hi! I'm Gemini, your AI coding assistant.</div>
+                                    <div class="message-actions">
+                                        <button class="msg-action-btn" title="Copy">
+                                            <i class="fas fa-copy"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="gemini-input-area">
+                            <div class="input-wrapper">
+                                <textarea id="geminiInput" placeholder="Ask Gemini anything about your code..." rows="1"></textarea>
+                                <button id="sendGemini" class="send-btn">
+                                    <i class="fas fa-paper-plane"></i>
+                                </button>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </aside>
+
+            <div class="editor-area">
+                <div class="editor-tabs">
+                    <div class="tab active" data-file="main.py">main.py</div>
+                </div>
+                <div id="codeEditor"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore-compat.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/python/python.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/javascript/javascript.min.js"></script>
+    <script src="firebase-config.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
